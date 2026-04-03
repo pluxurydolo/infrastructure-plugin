@@ -20,7 +20,7 @@ class FileUtils {
         props.setProperty('LAST_MODIFIED_DATE', currentDate)
 
         versionFile.withOutputStream { props.store(it, null) }
-        project.logger.lifecycle('lzlw Version file created with initial version 1.0.0')
+        project.logger.lifecycle('lzlw [version-plugin] Версионный файл создан с версией 1.0.0')
     }
 
     static File getVersionFile(Project project) {

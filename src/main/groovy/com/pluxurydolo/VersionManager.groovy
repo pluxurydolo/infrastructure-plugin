@@ -14,7 +14,7 @@ class VersionManager {
         if (!versionFile.exists()) {
             createVersionFile(versionFile, project)
         } else {
-            project.logger.lifecycle('ludl Version file already exists')
+            project.logger.lifecycle('ludl [version-plugin] Версионный файл уже существует в проекте')
         }
     }
 
@@ -39,7 +39,7 @@ class VersionManager {
         }
 
         String version = "$major.$minor.$patch"
-        project.logger.lifecycle("snua New project version: $version")
+        project.logger.lifecycle("snua [version-plugin] Новая версия проекта: $version")
 
         props.setProperty('VERSION_MAJOR', major.toString())
         props.setProperty('VERSION_MINOR', minor.toString())
@@ -55,7 +55,7 @@ class VersionManager {
         File versionFile = getVersionFile(project)
         versionFile.withInputStream { props.load(it) }
 
-        project.logger.lifecycle("Version: ${props.getProperty('VERSION')}")
-        project.logger.lifecycle("Last Modified: ${props.getProperty('LAST_MODIFIED_DATE')}")
+        project.logger.lifecycle("bxqi [version-plugin] Версия проекта: ${props.getProperty('VERSION')}")
+        project.logger.lifecycle("rspg [version-plugin] Время последнего изменения версии проекта: ${props.getProperty('LAST_MODIFIED_DATE')}")
     }
 }

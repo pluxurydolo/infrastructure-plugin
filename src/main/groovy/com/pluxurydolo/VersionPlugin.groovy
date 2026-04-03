@@ -55,6 +55,6 @@ class VersionPlugin implements Plugin<Project> {
 
         String version = props.getProperty('VERSION')
         project.version = version
-        project.logger.lifecycle("fxpe Project version set to: $version")
+        project.logger.lifecycle("fxpe [version-plugin] Установлена версия проекта: $version")
     }
 }
