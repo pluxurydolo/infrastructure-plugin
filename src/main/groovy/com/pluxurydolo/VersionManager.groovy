@@ -1,25 +1,18 @@
 package com.pluxurydolo
 
-import com.pluxurydolo.utils.DateUtils
 import org.gradle.api.Project
 
 import static com.pluxurydolo.utils.DateUtils.currentDate
+import static com.pluxurydolo.utils.DateUtils.isAfter
+import static com.pluxurydolo.utils.FileUtils.createVersionFile
 import static com.pluxurydolo.utils.FileUtils.getVersionFile
 
 class VersionManager {
     static void initVersionFile(Project project) {
         File versionFile = getVersionFile(project)
-        String currentDate = getCurrentDate()
 
         if (!versionFile.exists()) {
-            Properties props = new Properties()
-            props.setProperty('VERSION_MAJOR', '1')
-            props.setProperty('VERSION_MINOR', '0')
-            props.setProperty('VERSION_PATCH', '0')
-            props.setProperty('LAST_MODIFIED_DATE', currentDate)
-
-            versionFile.withOutputStream { props.store(it, null) }
-            project.logger.lifecycle('lzlw Version file created with initial version 1.0.0')
+            createVersionFile(versionFile, project)
         } else {
             project.logger.lifecycle('ludl Version file already exists')
         }
@@ -27,16 +20,18 @@ class VersionManager {
 
     static void bumpVersion(Project project) {
         Properties props = new Properties()
+
         File versionFile = getVersionFile(project)
-        String currentDate = getCurrentDate()
         versionFile.withInputStream { props.load(it) }
 
+        String currentDate = getCurrentDate()
         String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE', currentDate)
+
         int major = props.getProperty('VERSION_MAJOR').toInteger()
         int minor = props.getProperty('VERSION_MINOR').toInteger()
         int patch = props.getProperty('VERSION_PATCH').toInteger()
 
-        if (DateUtils.isAfter(currentDate, lastModifiedDate)) {
+        if (isAfter(currentDate, lastModifiedDate)) {
             minor++
             patch = 0
         } else {
