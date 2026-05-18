@@ -11,10 +11,10 @@ class VersionManager {
     static void initVersionFile(Project project) {
         File versionFile = getVersionFile(project)
 
-        if (!versionFile.exists()) {
-            createVersionFile(versionFile, project)
-        } else {
+        if (versionFile.exists()) {
             project.logger.lifecycle('ludl [version-plugin] Версионный файл уже существует в проекте')
+        } else {
+            createVersionFile(versionFile, project)
         }
     }
 
