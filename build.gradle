@@ -7,13 +7,13 @@ plugins {
 }
 
 group = 'io.github.pluxurydolo'
-version = '1.13.0-java21'
+version = '1.13.0'
 
 java {
     withJavadocJar()
     withSourcesJar()
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
