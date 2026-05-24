@@ -21,6 +21,10 @@ bin/
 .gradle/
 gradle-app.setting
 
+### Test ###
+src/test/
+src/integrationTest/
+
 ### Docker ###
 Dockerfile
 .dockerignore

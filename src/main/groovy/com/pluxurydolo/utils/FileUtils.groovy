@@ -43,6 +43,7 @@ class FileUtils {
         String content = template.text
                 .replace('{{SERVICE_NAME}}', serviceName)
                 .replace('{{IMAGE_NAME}}', imageName.toString())
+                .replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
 
         File targetFile = project.rootProject.file(outputPath)
         targetFile.parentFile.mkdirs()
@@ -65,9 +66,11 @@ class FileUtils {
             return
         }
 
-        String content = template.text.replace('{{SERVICE_NAME}}', serviceName)
-        File targetFile = project.rootProject.file('README.md')
+        String content = template.text
+                .replace('{{SERVICE_NAME}}', serviceName)
+                .replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
 
+        File targetFile = project.rootProject.file('README.md')
         targetFile.parentFile.mkdirs()
         targetFile.text = content
 
@@ -82,10 +85,12 @@ class FileUtils {
             return
         }
 
-        File targetFile = project.rootProject.file('README.md')
+        String content = template.text
+                .replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
 
+        File targetFile = project.rootProject.file('README.md')
         targetFile.parentFile.mkdirs()
-        targetFile.text = template.text
+        targetFile.text = content
 
         project.logger.lifecycle('qnls [infrastructure-plugin] Файл README.md сконфигурирован')
     }
