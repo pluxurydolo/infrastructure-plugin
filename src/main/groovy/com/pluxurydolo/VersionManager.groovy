@@ -29,10 +29,7 @@ class VersionManager {
 
         int majorVersion = props.getProperty('VERSION_MAJOR').toInteger()
         int minorVersion = props.getProperty('VERSION_MINOR').toInteger()
-
-        String versionPatch = props.getProperty('VERSION_PATCH')
-        String[] parts = versionPatch.split('-')
-        int patchVersion = parts[0].toInteger()
+        int patchVersion = props.getProperty('VERSION_PATCH').toInteger()
 
         if (isDateAfter(currentDate, lastModifiedDate)) {
             minorVersion++
@@ -41,14 +38,12 @@ class VersionManager {
             patchVersion++
         }
 
-        String patchWithQualificator = extractQualificator(patchVersion, parts)
-
-        String version = "$majorVersion.$minorVersion.$patchWithQualificator"
+        String version = "$majorVersion.$minorVersion.$patchVersion"
         project.logger.lifecycle("snua [infrastructure-plugin] Новая версия проекта: $version")
 
         props.setProperty('VERSION_MAJOR', majorVersion.toString())
         props.setProperty('VERSION_MINOR', minorVersion.toString())
-        props.setProperty('VERSION_PATCH', patchWithQualificator)
+        props.setProperty('VERSION_PATCH', patchVersion.toString())
 
         props.setProperty('VERSION', version)
         props.setProperty('LAST_MODIFIED_DATE', currentDate)
@@ -66,15 +61,5 @@ class VersionManager {
 
         String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE')
         project.logger.lifecycle("rspg [infrastructure-plugin] Время последнего изменения версии проекта: ${lastModifiedDate}")
-    }
-
-    private static String extractQualificator(int patch, String[] parts) {
-        if (parts.length == 1) {
-            return patch
-        }
-
-        String qualificator = parts[1]
-
-        return "$patch-$qualificator"
     }
 }
