@@ -25,6 +25,26 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
 
+      - name: Checkstyle
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: --no-daemon -i pmdMain pmdTest pmdIntegrationTest
+
+      - name: Validate Logs
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: --no-daemon -i validateLogs
+
+      - name: Test
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: --no-daemon -i test
+
+      - name: Integration Test
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: --no-daemon -i integrationTest
+
       - name: Bump version
         uses: gradle/gradle-build-action@v3
         with:
@@ -45,7 +65,7 @@ jobs:
       - name: Build and publish
         uses: gradle/gradle-build-action@v3
         with:
-          arguments: --no-daemon -i jreleaserConfig build test publish
+          arguments: --no-daemon -i jreleaserConfig build publish
         env:
           JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}

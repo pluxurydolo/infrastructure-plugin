@@ -60,7 +60,12 @@ class InfrastructurePlugin implements Plugin<Project> {
             it.group = 'ci'
 
             it.doLast {
-                generateFromTemplate(project, 'github-ci.yml.tpl', '.github/workflows/release.yml')
+                if (isPlugin(project)) {
+                    generateFromTemplate(project, 'github-ci-plugin.yml.tpl', '.github/workflows/release.yml')
+                } else if (isStarter(project)) {
+                    generateFromTemplate(project, 'github-ci-starter.yml.tpl', '.github/workflows/release.yml')
+                }
+
             }
         }
 
@@ -69,9 +74,9 @@ class InfrastructurePlugin implements Plugin<Project> {
 
             it.doLast {
                 if (isPlugin(project) || isStarter(project)) {
-                    configureJreleaserReadme(project)
+                    generateJreleaserReadme(project)
                 } else {
-                    configureDockerReadme(project)
+                    generateDockerReadme(project)
                 }
             }
         }

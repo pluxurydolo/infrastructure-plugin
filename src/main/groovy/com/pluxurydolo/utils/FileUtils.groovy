@@ -56,7 +56,7 @@ class FileUtils {
         project.logger.lifecycle("sjrh [infrastructure-plugin] Файл ${outputPath} сконфигурирован")
     }
 
-    static void configureDockerReadme(Project project) {
+    static void generateDockerReadme(Project project) {
         String serviceName = project.rootProject.name
 
         InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream('templates/readme-docker.tpl')
@@ -77,7 +77,7 @@ class FileUtils {
         project.logger.lifecycle('tarq [infrastructure-plugin] Файл README.md сконфигурирован')
     }
 
-    static void configureJreleaserReadme(Project project) {
+    static void generateJreleaserReadme(Project project) {
         InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream('templates/readme-jreleaser.tpl')
 
         if (template == null) {
