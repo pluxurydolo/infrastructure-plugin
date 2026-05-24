@@ -1,5 +1,6 @@
 package com.pluxurydolo.utils
 
+import com.pluxurydolo.InfrastructurePlugin
 import org.gradle.api.Project
 
 import static com.pluxurydolo.utils.DateUtils.getCurrentDate
@@ -20,11 +21,72 @@ class FileUtils {
         props.setProperty('LAST_MODIFIED_DATE', currentDate)
 
         versionFile.withOutputStream { props.store(it, null) }
-        project.logger.lifecycle('lzlw [version-plugin] Версионный файл создан с версией 1.0.0')
+        project.logger.lifecycle('lzlw [infrastructure-plugin] Версионный файл создан с версией 1.0.0')
     }
 
     static File getVersionFile(Project project) {
         String fileName = 'version.properties'
         return new File(project.projectDir, fileName)
+    }
+
+    static void generateFromTemplate(Project project, String templateName, String outputPath, boolean executable = false) {
+        String serviceName = project.rootProject.name
+        GString imageName = "pluxurydolo/${serviceName}"
+
+        InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream("templates/${templateName}")
+
+        if (template == null) {
+            project.logger.error("fpka [infrastructure-plugin] Шаблон не найден: ${templateName}")
+            return
+        }
+
+        String content = template.text
+                .replace('{{SERVICE_NAME}}', serviceName)
+                .replace('{{IMAGE_NAME}}', imageName.toString())
+
+        File targetFile = project.rootProject.file(outputPath)
+        targetFile.parentFile.mkdirs()
+        targetFile.text = content
+
+        if (executable) {
+            targetFile.setExecutable(true)
+        }
+
+        project.logger.lifecycle("sjrh [infrastructure-plugin] Файл ${outputPath} сконфигурирован")
+    }
+
+    static void configureDockerReadme(Project project) {
+        String serviceName = project.rootProject.name
+
+        InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream('templates/readme-docker.tpl')
+
+        if (template == null) {
+            project.logger.error('nqpz [infrastructure-plugin] Шаблон не найден: readme-docker.tpl')
+            return
+        }
+
+        String content = template.text.replace('{{SERVICE_NAME}}', serviceName)
+        File targetFile = project.rootProject.file('README.md')
+
+        targetFile.parentFile.mkdirs()
+        targetFile.text = content
+
+        project.logger.lifecycle('tarq [infrastructure-plugin] Файл README.md сконфигурирован')
+    }
+
+    static void configureJreleaserReadme(Project project) {
+        InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream('templates/readme-jreleaser.tpl')
+
+        if (template == null) {
+            project.logger.error('pndk [infrastructure-plugin] Шаблон не найден: readme-jreleaser.tpl')
+            return
+        }
+
+        File targetFile = project.rootProject.file('README.md')
+
+        targetFile.parentFile.mkdirs()
+        targetFile.text = template.text
+
+        project.logger.lifecycle('qnls [infrastructure-plugin] Файл README.md сконфигурирован')
     }
 }

@@ -9,7 +9,7 @@ class DateUtils {
         return now.format('yyyy-MM-dd')
     }
 
-    static boolean isAfter(String date1, String date2) {
+    static boolean isDateAfter(String date1, String date2) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern('yyyy-MM-dd')
         LocalDate localDate1 = LocalDate.parse(date1, formatter)
         LocalDate localDate2 = LocalDate.parse(date2, formatter)

@@ -1,3 +1,4 @@
+import static org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import static org.jreleaser.model.Active.ALWAYS
 
 plugins {
@@ -7,7 +8,7 @@ plugins {
 }
 
 group = 'io.github.pluxurydolo'
-version = '1.13.0'
+version = '2.0.0'
 
 java {
     withJavadocJar()
@@ -24,11 +25,17 @@ repositories {
 
 gradlePlugin {
     plugins {
-        versionPlugin {
-            id = 'io.github.pluxurydolo.version-plugin'
-            implementationClass = 'com.pluxurydolo.VersionPlugin'
+        infrastructurePlugin {
+            id = 'io.github.pluxurydolo.infrastructure-plugin'
+            implementationClass = 'com.pluxurydolo.InfrastructurePlugin'
         }
     }
+}
+
+processResources {
+    duplicatesStrategy = INCLUDE
+    from 'src/main/resources'
+    into 'templates'
 }
 
 afterEvaluate {
@@ -36,9 +43,9 @@ afterEvaluate {
         publications {
             withType(MavenPublication).configureEach {
                 pom {
-                    name = 'version-plugin'
-                    description = 'Version Plugin made for personal use'
-                    url = 'https://github.com/pluxurydolo/version-plugin'
+                    name = 'infrastructure-plugin'
+                    description = 'Infrastructure Plugin made for personal use'
+                    url = 'https://github.com/pluxurydolo/infrastructure-plugin'
 
                     developers {
                         developer {
@@ -48,8 +55,8 @@ afterEvaluate {
                     }
 
                     scm {
-                        url = 'scm:git:git://github.com/version-plugin.git'
-                        connection = 'scm:git:git://github.com/version-plugin.git'
+                        url = 'scm:git:git://github.com/infrastructure-plugin.git'
+                        connection = 'scm:git:git://github.com/infrastructure-plugin.git'
                         tag = project.version
                     }
 

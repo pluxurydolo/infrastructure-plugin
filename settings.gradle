@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'version-plugin'
+rootProject.name = 'infrastructure-plugin'

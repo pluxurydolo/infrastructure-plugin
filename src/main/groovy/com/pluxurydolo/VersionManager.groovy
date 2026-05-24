@@ -3,7 +3,7 @@ package com.pluxurydolo
 import org.gradle.api.Project
 
 import static com.pluxurydolo.utils.DateUtils.currentDate
-import static com.pluxurydolo.utils.DateUtils.isAfter
+import static com.pluxurydolo.utils.DateUtils.isDateAfter
 import static com.pluxurydolo.utils.FileUtils.createVersionFile
 import static com.pluxurydolo.utils.FileUtils.getVersionFile
 
@@ -12,7 +12,7 @@ class VersionManager {
         File versionFile = getVersionFile(project)
 
         if (versionFile.exists()) {
-            project.logger.lifecycle('ludl [version-plugin] Версионный файл уже существует в проекте')
+            project.logger.lifecycle('ludl [infrastructure-plugin] Версионный файл уже существует в проекте')
         } else {
             createVersionFile(versionFile, project)
         }
@@ -27,23 +27,29 @@ class VersionManager {
         String currentDate = getCurrentDate()
         String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE', currentDate)
 
-        int major = props.getProperty('VERSION_MAJOR').toInteger()
-        int minor = props.getProperty('VERSION_MINOR').toInteger()
-        int patch = props.getProperty('VERSION_PATCH').toInteger()
+        int majorVersion = props.getProperty('VERSION_MAJOR').toInteger()
+        int minorVersion = props.getProperty('VERSION_MINOR').toInteger()
 
-        if (isAfter(currentDate, lastModifiedDate)) {
-            minor++
-            patch = 0
+        String versionPatch = props.getProperty('VERSION_PATCH')
+        String[] parts = versionPatch.split('-')
+        int patchVersion = parts[0].toInteger()
+
+        if (isDateAfter(currentDate, lastModifiedDate)) {
+            minorVersion++
+            patchVersion = 0
         } else {
-            patch++
+            patchVersion++
         }
 
-        String version = "$major.$minor.$patch"
-        project.logger.lifecycle("snua [version-plugin] Новая версия проекта: $version")
+        String patchWithQualificator = extractQualificator(patchVersion, parts)
 
-        props.setProperty('VERSION_MAJOR', major.toString())
-        props.setProperty('VERSION_MINOR', minor.toString())
-        props.setProperty('VERSION_PATCH', patch.toString())
+        String version = "$majorVersion.$minorVersion.$patchWithQualificator"
+        project.logger.lifecycle("snua [infrastructure-plugin] Новая версия проекта: $version")
+
+        props.setProperty('VERSION_MAJOR', majorVersion.toString())
+        props.setProperty('VERSION_MINOR', minorVersion.toString())
+        props.setProperty('VERSION_PATCH', patchWithQualificator)
+
         props.setProperty('VERSION', version)
         props.setProperty('LAST_MODIFIED_DATE', currentDate)
 
@@ -55,7 +61,20 @@ class VersionManager {
         File versionFile = getVersionFile(project)
         versionFile.withInputStream { props.load(it) }
 
-        project.logger.lifecycle("bxqi [version-plugin] Версия проекта: ${props.getProperty('VERSION')}")
-        project.logger.lifecycle("rspg [version-plugin] Время последнего изменения версии проекта: ${props.getProperty('LAST_MODIFIED_DATE')}")
+        String version = props.getProperty('VERSION')
+        project.logger.lifecycle("bxqi [infrastructure-plugin] Версия проекта: ${version}")
+
+        String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE')
+        project.logger.lifecycle("rspg [infrastructure-plugin] Время последнего изменения версии проекта: ${lastModifiedDate}")
+    }
+
+    private static String extractQualificator(int patch, String[] parts) {
+        if (parts.length == 1) {
+            return patch
+        }
+
+        String qualificator = parts[1]
+
+        return "$patch-$qualificator"
     }
 }
