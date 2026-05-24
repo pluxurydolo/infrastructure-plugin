@@ -4,6 +4,7 @@ import com.pluxurydolo.InfrastructurePlugin
 import org.gradle.api.Project
 
 import static com.pluxurydolo.utils.DateUtils.getCurrentDate
+import static com.pluxurydolo.utils.InfrastructureFile.*
 
 class FileUtils {
     static void createVersionFile(File versionFile, Project project) {
@@ -29,14 +30,14 @@ class FileUtils {
         return new File(project.projectDir, fileName)
     }
 
-    static void generateFromTemplate(Project project, String templateName, String outputPath, boolean executable = false) {
+    static void generateFromTemplate(Project project, InfrastructureFile infrastructureFile, boolean executable = false) {
         String serviceName = project.rootProject.name
         GString imageName = "pluxurydolo/${serviceName}"
 
-        InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream("templates/${templateName}")
+        InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream("templates/${infrastructureFile.template}")
 
         if (template == null) {
-            project.logger.error("fpka [infrastructure-plugin] Шаблон не найден: ${templateName}")
+            project.logger.error("fpka [infrastructure-plugin] Шаблон не найден: ${infrastructureFile.template}")
             return
         }
 
@@ -45,7 +46,7 @@ class FileUtils {
                 .replace('{{IMAGE_NAME}}', imageName.toString())
                 .replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
 
-        File targetFile = project.rootProject.file(outputPath)
+        File targetFile = project.rootProject.file(infrastructureFile.output)
         targetFile.parentFile.mkdirs()
         targetFile.text = content
 
@@ -53,7 +54,7 @@ class FileUtils {
             targetFile.setExecutable(true)
         }
 
-        project.logger.lifecycle("sjrh [infrastructure-plugin] Файл ${outputPath} сконфигурирован")
+        project.logger.lifecycle("sjrh [infrastructure-plugin] Файл ${infrastructureFile.output} сконфигурирован")
     }
 
     static void generateDockerReadme(Project project) {
@@ -93,5 +94,27 @@ class FileUtils {
         targetFile.text = content
 
         project.logger.lifecycle('qnls [infrastructure-plugin] Файл README.md сконфигурирован')
+    }
+
+    static boolean dockerFilesExist(Project project) {
+        return List.of(DOCKERFILE, DOCKERIGNORE, ENTRYPOINT)
+                .stream()
+                .allMatch { fileExists(project, it) }
+    }
+
+    static boolean gitlabCiExists(Project project) {
+        return fileExists(project, GITLABCI)
+    }
+
+    static boolean githubCiExists(Project project) {
+        return fileExists(project, GITHUBCI_PLUGIN) || fileExists(project, GITHUBCI_STARTER)
+    }
+
+    static boolean readmeExists(Project project) {
+        return fileExists(project, README_DOCKER) || fileExists(project, README_JRELEASER)
+    }
+
+    private static boolean fileExists(Project project, InfrastructureFile infrastructureFile) {
+        return project.rootProject.file(infrastructureFile.output).exists()
     }
 }

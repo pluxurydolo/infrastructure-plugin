@@ -7,6 +7,7 @@ import org.gradle.api.tasks.TaskProvider
 
 import static com.pluxurydolo.VersionManager.*
 import static com.pluxurydolo.utils.FileUtils.*
+import static com.pluxurydolo.utils.InfrastructureFile.*
 import static com.pluxurydolo.utils.ProjectUtils.isPlugin
 import static com.pluxurydolo.utils.ProjectUtils.isStarter
 
@@ -42,9 +43,9 @@ class InfrastructurePlugin implements Plugin<Project> {
             it.group = 'docker'
 
             it.doLast {
-                generateFromTemplate(project, 'Dockerfile.tpl', 'Dockerfile')
-                generateFromTemplate(project, 'dockerignore.tpl', '.dockerignore')
-                generateFromTemplate(project, 'entrypoint.sh.tpl', 'scripts/entrypoint.sh', true)
+                generateFromTemplate(project, DOCKERFILE)
+                generateFromTemplate(project, DOCKERIGNORE)
+                generateFromTemplate(project, ENTRYPOINT, true)
             }
         }
 
@@ -52,7 +53,7 @@ class InfrastructurePlugin implements Plugin<Project> {
             it.group = 'ci'
 
             it.doLast {
-                generateFromTemplate(project, 'gitlab-ci.yml.tpl', '.gitlab-ci.yml')
+                generateFromTemplate(project, GITLABCI)
             }
         }
 
@@ -61,9 +62,9 @@ class InfrastructurePlugin implements Plugin<Project> {
 
             it.doLast {
                 if (isPlugin(project)) {
-                    generateFromTemplate(project, 'github-ci-plugin.yml.tpl', '.github/workflows/release.yml')
+                    generateFromTemplate(project, GITHUBCI_PLUGIN)
                 } else if (isStarter(project)) {
-                    generateFromTemplate(project, 'github-ci-starter.yml.tpl', '.github/workflows/release.yml')
+                    generateFromTemplate(project, GITHUBCI_STARTER)
                 }
 
             }
@@ -91,11 +92,9 @@ class InfrastructurePlugin implements Plugin<Project> {
             setProjectVersion(project)
 
             if (isPlugin(project) || isStarter(project)) {
-                generateGitHubCi.get().actions.each { it.execute(generateGitHubCi.get()) }
+                generatePluginOrStarterFiles(project, generateGitHubCi, generateReadme)
             } else {
-                generateDockerFiles.get().actions.each { it.execute(generateDockerFiles.get()) }
-                generateGitLabCi.get().actions.each { it.execute(generateGitLabCi.get()) }
-                generateReadme.get().actions.each { it.execute(generateReadme.get()) }
+                generateApplicationFiles(project, generateDockerFiles, generateGitLabCi, generateReadme)
             }
         }
     }
@@ -108,5 +107,38 @@ class InfrastructurePlugin implements Plugin<Project> {
         String version = props.getProperty('VERSION')
         project.version = version
         project.logger.lifecycle("fxpe [infrastructure-plugin] Установлена версия проекта: $version")
+    }
+
+    private static void generatePluginOrStarterFiles(
+            Project project,
+            TaskProvider<Task> generateGitHubCi,
+            TaskProvider<Task> generateReadme
+    ) {
+        if (!githubCiExists(project)) {
+            generateGitHubCi.get().actions.each { it.execute(generateGitHubCi.get()) }
+        }
+
+        if (!readmeExists(project)) {
+            generateReadme.get().actions.each { it.execute(generateReadme.get()) }
+        }
+    }
+
+    private static void generateApplicationFiles(
+            Project project,
+            TaskProvider<Task> generateDockerFiles,
+            TaskProvider<Task> generateGitLabCi,
+            TaskProvider<Task> generateReadme
+    ) {
+        if (!dockerFilesExist(project)) {
+            generateDockerFiles.get().actions.each { it.execute(generateDockerFiles.get()) }
+        }
+
+        if (!gitlabCiExists(project)) {
+            generateGitLabCi.get().actions.each { it.execute(generateGitLabCi.get()) }
+        }
+
+        if (!readmeExists(project)) {
+            generateReadme.get().actions.each { it.execute(generateReadme.get()) }
+        }
     }
 }
