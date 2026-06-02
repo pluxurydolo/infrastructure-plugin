@@ -10,7 +10,6 @@
 
 ### Logs ###
 *.log
-logs/
 
 ### Build outputs ###
 build/
