@@ -142,7 +142,7 @@ deploy:
       ssh $SSH_USER@$SSH_HOST "
         docker stop {{SERVICE_NAME}} || true
         docker rm {{SERVICE_NAME}} || true
-        sudo fuser -k [номер-порта]/tcp || true
+        sudo fuser -k {{DEPLOY_PORT}}/tcp || true
         sleep 2
 
         docker pull ${IMAGE_NAME}:${TAG}
@@ -150,7 +150,7 @@ deploy:
         docker run -d \
           --name {{SERVICE_NAME}} \
           --restart always \
-          -p [номер-порта]:8080 \
+          -p {{DEPLOY_PORT}}:8080 \
           -v ~/.env:/app/.env:ro \
           -v /home/$SSH_USER/logs/{{SERVICE_NAME}}:/app/logs \
           ${IMAGE_NAME}:${TAG}

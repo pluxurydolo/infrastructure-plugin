@@ -1,6 +1,7 @@
 package com.pluxurydolo.utils
 
 import com.pluxurydolo.InfrastructurePlugin
+import com.pluxurydolo.extension.DeployExtension
 import org.gradle.api.Project
 
 import static com.pluxurydolo.utils.DateUtils.getCurrentDate
@@ -41,9 +42,12 @@ class FileUtils {
             return
         }
 
+        String deployPort = project.extensions.getByType(DeployExtension.class).port.toString()
+
         String content = template.text
                 .replace('{{SERVICE_NAME}}', serviceName)
                 .replace('{{IMAGE_NAME}}', imageName.toString())
+                .replace('{{DEPLOY_PORT}}', deployPort)
                 .replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
 
         File targetFile = project.rootProject.file(infrastructureFile.output)
@@ -55,45 +59,6 @@ class FileUtils {
         }
 
         project.logger.lifecycle("sjrh [infrastructure-plugin] Файл ${infrastructureFile.output} сконфигурирован")
-    }
-
-    static void generateDockerReadme(Project project) {
-        String serviceName = project.rootProject.name
-
-        InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream('templates/readme-docker.tpl')
-
-        if (template == null) {
-            project.logger.error('nqpz [infrastructure-plugin] Шаблон не найден: readme-docker.tpl')
-            return
-        }
-
-        String content = template.text
-                .replace('{{SERVICE_NAME}}', serviceName)
-                .replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
-
-        File targetFile = project.rootProject.file('README.md')
-        targetFile.parentFile.mkdirs()
-        targetFile.text = content
-
-        project.logger.lifecycle('tarq [infrastructure-plugin] Файл README.md сконфигурирован')
-    }
-
-    static void generateJreleaserReadme(Project project) {
-        InputStream template = InfrastructurePlugin.classLoader.getResourceAsStream('templates/readme-jreleaser.tpl')
-
-        if (template == null) {
-            project.logger.error('pndk [infrastructure-plugin] Шаблон не найден: readme-jreleaser.tpl')
-            return
-        }
-
-        String content = template.text
-                .replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
-
-        File targetFile = project.rootProject.file('README.md')
-        targetFile.parentFile.mkdirs()
-        targetFile.text = content
-
-        project.logger.lifecycle('qnls [infrastructure-plugin] Файл README.md сконфигурирован')
     }
 
     static boolean dockerFilesExist(Project project) {

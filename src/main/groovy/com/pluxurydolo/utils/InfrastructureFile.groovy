@@ -7,8 +7,8 @@ enum InfrastructureFile {
     GITLABCI('gitlab-ci.yml.tpl', '.gitlab-ci.yml'),
     GITHUBCI_PLUGIN('github-ci-plugin.yml.tpl', '.github/workflows/release.yml'),
     GITHUBCI_STARTER('github-ci-starter.yml.tpl', '.github/workflows/release.yml'),
-    README_DOCKER('templates/readme-docker.tpl', 'README.md'),
-    README_JRELEASER('templates/readme-jreleaser.tpl', 'README.md');
+    README_DOCKER('readme-docker.tpl', 'README.md'),
+    README_JRELEASER('readme-jreleaser.tpl', 'README.md');
 
     private final String template
     private final String output

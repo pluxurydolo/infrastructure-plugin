@@ -1,5 +1,7 @@
 package com.pluxurydolo
 
+import com.pluxurydolo.extension.DeployExtension
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -15,6 +17,8 @@ class InfrastructurePlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        DeployExtension deployExtension = project.extensions.create('deploy', DeployExtension.class)
+
         TaskProvider<Task> initVersionTask = project.tasks.register('initVersion') {
             it.group = 'version'
 
@@ -75,14 +79,18 @@ class InfrastructurePlugin implements Plugin<Project> {
 
             it.doLast {
                 if (isPlugin(project) || isStarter(project)) {
-                    generateJreleaserReadme(project)
+                    generateFromTemplate(project, README_JRELEASER)
                 } else {
-                    generateDockerReadme(project)
+                    generateFromTemplate(project, README_DOCKER)
                 }
             }
         }
 
         project.afterEvaluate {
+            if (deployExtension.port == null && !isPlugin(project) && !isStarter(project)) {
+                throw new GradleException('hxdm Требуется указать порт деплоя: deploy { port = 1234 }')
+            }
+
             File versionFile = getVersionFile(project)
 
             if (!versionFile.exists()) {
