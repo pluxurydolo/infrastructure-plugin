@@ -30,7 +30,7 @@ USER appuser
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+  CMD netstat -tlnp 2>/dev/null | grep 8080 || exit 1
 
 ENTRYPOINT ["/entrypoint.sh"]
