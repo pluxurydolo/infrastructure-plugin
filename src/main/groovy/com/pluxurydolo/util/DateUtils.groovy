@@ -1,4 +1,4 @@
-package com.pluxurydolo.utils
+package com.pluxurydolo.util
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

@@ -1,4 +1,4 @@
-package com.pluxurydolo.utils
+package com.pluxurydolo.util
 
 import org.gradle.api.Project
 

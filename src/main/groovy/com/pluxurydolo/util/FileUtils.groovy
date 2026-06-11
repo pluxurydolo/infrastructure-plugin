@@ -1,11 +1,11 @@
-package com.pluxurydolo.utils
+package com.pluxurydolo.util
 
 import com.pluxurydolo.InfrastructurePlugin
 import com.pluxurydolo.extension.DeployExtension
 import org.gradle.api.Project
 
-import static com.pluxurydolo.utils.DateUtils.getCurrentDate
-import static com.pluxurydolo.utils.InfrastructureFile.*
+import static com.pluxurydolo.util.DateUtils.getCurrentDate
+import static com.pluxurydolo.util.InfrastructureFile.*
 
 class FileUtils {
     static void createVersionFile(File versionFile, Project project) {

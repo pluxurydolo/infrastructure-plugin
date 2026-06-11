@@ -8,10 +8,10 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 
 import static com.pluxurydolo.VersionManager.*
-import static com.pluxurydolo.utils.FileUtils.*
-import static com.pluxurydolo.utils.InfrastructureFile.*
-import static com.pluxurydolo.utils.ProjectUtils.isPlugin
-import static com.pluxurydolo.utils.ProjectUtils.isStarter
+import static com.pluxurydolo.util.FileUtils.*
+import static com.pluxurydolo.util.InfrastructureFile.*
+import static com.pluxurydolo.util.ProjectUtils.isPlugin
+import static com.pluxurydolo.util.ProjectUtils.isStarter
 
 class InfrastructurePlugin implements Plugin<Project> {
 

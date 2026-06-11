@@ -2,10 +2,10 @@ package com.pluxurydolo
 
 import org.gradle.api.Project
 
-import static com.pluxurydolo.utils.DateUtils.currentDate
-import static com.pluxurydolo.utils.DateUtils.isDateAfter
-import static com.pluxurydolo.utils.FileUtils.createVersionFile
-import static com.pluxurydolo.utils.FileUtils.getVersionFile
+import static com.pluxurydolo.util.DateUtils.currentDate
+import static com.pluxurydolo.util.DateUtils.isDateAfter
+import static com.pluxurydolo.util.FileUtils.createVersionFile
+import static com.pluxurydolo.util.FileUtils.getVersionFile
 
 class VersionManager {
     static void initVersionFile(Project project) {

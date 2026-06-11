@@ -1,4 +1,4 @@
-package com.pluxurydolo.utils
+package com.pluxurydolo.util
 
 enum InfrastructureFile {
     DOCKERFILE('Dockerfile.tpl', 'Dockerfile'),
