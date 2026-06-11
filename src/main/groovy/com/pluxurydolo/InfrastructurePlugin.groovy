@@ -88,7 +88,8 @@ class InfrastructurePlugin implements Plugin<Project> {
 
         project.afterEvaluate {
             if (deployExtension.port == null && !isPlugin(project) && !isStarter(project)) {
-                throw new GradleException('hxdm Требуется указать порт деплоя: deploy { port = 1234 }')
+                project.logger.error('hxdm [infrastructure-plugin] Требуется указать порт деплоя: deploy { port = 1234 }')
+                throw new GradleException('Не указан порт деплоя')
             }
 
             File versionFile = getVersionFile(project)
