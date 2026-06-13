@@ -26,6 +26,11 @@ COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+RUN mkdir -p /app/logs && \
+    chown -R appuser:appgroup /app/logs && \
+    chmod 755 /app/logs
+
 USER appuser
 
 EXPOSE 8080
