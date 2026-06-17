@@ -142,7 +142,12 @@ deploy:
       ssh $SSH_USER@$SSH_HOST "
         docker stop {{SERVICE_NAME}} || true
         docker rm {{SERVICE_NAME}} || true
+
         sudo fuser -k {{DEPLOY_PORT}}/tcp || true
+
+        mkdir -p /home/$SSH_USER/logs/{{SERVICE_NAME}}
+        chmod 777 /home/$SSH_USER/logs/{{SERVICE_NAME}}
+
         sleep 2
 
         docker pull ${IMAGE_NAME}:${TAG}
