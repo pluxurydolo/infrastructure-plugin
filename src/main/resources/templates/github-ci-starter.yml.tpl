@@ -1,31 +1,31 @@
-name: Publish to central.sonatype.com
+name: Publish to Maven Central
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - main
+
+env:
+  JAVA_VERSION: '25'
+  JAVA_DISTRIBUTION: 'temurin'
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
-    environment: central.sonatype.com
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up JDK 25
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
-          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
 
-      - name: Checkstyle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Checkstyle (PMD)
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i pmdMain pmdTest pmdIntegrationTest
@@ -35,22 +35,102 @@ jobs:
         with:
           arguments: --no-daemon -i validateLogs
 
-      - name: Test
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit Tests
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i test
 
-      - name: Integration Test
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/build/test-results/**/TEST-*.xml'
+
+  integration-test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Integration Tests
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i integrationTest
+
+      - name: Upload Integration Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: '**/build/test-results/**/TEST-*.xml'
+
+  bump-and-tag:
+    needs: [test, integration-test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      new_version: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Bump version
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i bumpVersion
 
-      - name: Commit version update
+      - name: Get new version
+        id: get_version
+        run: |
+          VERSION=$(grep "^VERSION=" version.properties | cut -d'=' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit version update and create tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -58,11 +138,35 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "chore: bump version [skip ci]"
             git push origin HEAD:main
+            git tag -a "v${{ steps.get_version.outputs.VERSION }}" -m "Release v${{ steps.get_version.outputs.VERSION }}"
+            git push origin "v${{ steps.get_version.outputs.VERSION }}"
           else
             echo "No changes to version.properties"
           fi
 
-      - name: Build and publish
+  publish:
+    needs: bump-and-tag
+    runs-on: ubuntu-latest
+    environment: CI/CD
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build and publish to Maven Central
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i jreleaserConfig build publish
@@ -74,7 +178,7 @@ jobs:
           JRELEASER_MAVENCENTRAL_SONATYPE_TOKEN: ${{ secrets.JRELEASER_MAVENCENTRAL_SONATYPE_TOKEN }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
 
-      - name: Release
+      - name: Release with JReleaser
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i jreleaserFullRelease

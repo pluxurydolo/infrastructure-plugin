@@ -1,17 +1,47 @@
-name: Publish to central.sonatype.com
+name: Publish to Maven Central
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - main
+
+env:
+  JAVA_VERSION: '25'
+  JAVA_DISTRIBUTION: 'temurin'
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
-    environment: central.sonatype.com
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Checkstyle (PMD)
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: --no-daemon -i pmdMain pmdTest pmdIntegrationTest
+
+      - name: Validate Logs
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: --no-daemon -i validateLogs
+
+  bump-and-tag:
+    needs: lint
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-
+    outputs:
+      new_version: ${{ steps.get_version.outputs.VERSION }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,15 +52,29 @@ jobs:
       - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
-          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Bump version
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i bumpVersion
 
-      - name: Commit version update
+      - name: Get new version
+        id: get_version
+        run: |
+          VERSION=$(grep "^VERSION=" version.properties | cut -d'=' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit version update and create tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -38,9 +82,32 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "chore: bump version [skip ci]"
             git push origin HEAD:main
+            git tag -a "v${{ steps.get_version.outputs.VERSION }}" -m "Release v${{ steps.get_version.outputs.VERSION }}"
+            git push origin "v${{ steps.get_version.outputs.VERSION }}"
           else
             echo "No changes to version.properties"
           fi
+  publish:
+    needs: bump-and-tag
+    runs-on: ubuntu-latest
+    environment: CI/CD
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build and publish
         uses: gradle/gradle-build-action@v3

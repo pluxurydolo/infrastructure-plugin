@@ -67,12 +67,18 @@ class FileUtils {
                 .allMatch { fileExists(project, it) }
     }
 
-    static boolean gitlabCiExists(Project project) {
+    static boolean gitlabCIExists(Project project) {
         return fileExists(project, GITLABCI)
     }
 
-    static boolean githubCiExists(Project project) {
-        return fileExists(project, GITHUBCI_PLUGIN) || fileExists(project, GITHUBCI_STARTER)
+    static boolean githubCIExists(Project project) {
+        return fileExists(project, GITHUBCI_PLUGIN)
+                || fileExists(project, GITHUBCI_STARTER)
+                || fileExists(project, GITHUBCI_APP)
+    }
+
+    static boolean dependabotConfigExists(Project project) {
+        return fileExists(project, DEPENDABOT_CONFIG)
     }
 
     static boolean readmeExists(Project project) {

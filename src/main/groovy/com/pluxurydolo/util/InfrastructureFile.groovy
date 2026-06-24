@@ -7,6 +7,8 @@ enum InfrastructureFile {
     GITLABCI('gitlab-ci.yml.tpl', '.gitlab-ci.yml'),
     GITHUBCI_PLUGIN('github-ci-plugin.yml.tpl', '.github/workflows/release.yml'),
     GITHUBCI_STARTER('github-ci-starter.yml.tpl', '.github/workflows/release.yml'),
+    GITHUBCI_APP('github-ci-app.yml.tpl', '.github/workflows/deploy.yml'),
+    DEPENDABOT_CONFIG('dependabot.yml.tpl', '.github/dependabot.yml'),
     README_DOCKER('readme-docker.tpl', 'README.md'),
     README_JRELEASER('readme-jreleaser.tpl', 'README.md');
 
