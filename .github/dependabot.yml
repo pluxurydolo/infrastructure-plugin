@@ -4,10 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      day: "sunday"
+      time: "00:00"
       timezone: "Europe/Moscow"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 100
     labels:
       - "dependencies"
     reviewers:
@@ -22,8 +22,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      day: "sunday"
+      time: "00:00"
       timezone: "Europe/Moscow"
     labels:
       - "dependencies"
