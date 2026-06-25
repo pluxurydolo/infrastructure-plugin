@@ -1,3 +1,6 @@
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 import static org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import static org.jreleaser.model.Active.ALWAYS
 
@@ -8,7 +11,11 @@ plugins {
 }
 
 group = 'io.github.pluxurydolo'
-version = '5.1.0'
+version = file('version.properties').withInputStream {
+    Properties props = new Properties()
+    props.load(it)
+    props.getProperty('VERSION')
+}
 
 java {
     withJavadocJar()
@@ -108,4 +115,53 @@ jreleaser {
             }
         }
     }
+}
+
+tasks.register('bumpVersion') {
+    group = 'version'
+
+    doLast {
+        Properties props = new Properties()
+
+        File versionFile = file('version.properties')
+        versionFile.withInputStream { props.load(it) }
+
+        String currentDate = getCurrentDate()
+        String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE', currentDate)
+
+        int majorVersion = props.getProperty('VERSION_MAJOR').toInteger()
+        int minorVersion = props.getProperty('VERSION_MINOR').toInteger()
+        int patchVersion = props.getProperty('VERSION_PATCH').toInteger()
+
+        if (isDateAfter(currentDate, lastModifiedDate)) {
+            minorVersion++
+            patchVersion = 0
+        } else {
+            patchVersion++
+        }
+
+        String version = "$majorVersion.$minorVersion.$patchVersion"
+        project.logger.lifecycle("snua [infrastructure-plugin] Новая версия проекта: $version")
+
+        props.setProperty('VERSION_MAJOR', majorVersion.toString())
+        props.setProperty('VERSION_MINOR', minorVersion.toString())
+        props.setProperty('VERSION_PATCH', patchVersion.toString())
+
+        props.setProperty('VERSION', version)
+        props.setProperty('LAST_MODIFIED_DATE', currentDate)
+
+        versionFile.withOutputStream { props.store(it, null) }
+    }
+}
+
+static String getCurrentDate() {
+    Date now = new Date()
+    return now.format('yyyy-MM-dd')
+}
+
+static boolean isDateAfter(String date1, String date2) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern('yyyy-MM-dd')
+    LocalDate localDate1 = LocalDate.parse(date1, formatter)
+    LocalDate localDate2 = LocalDate.parse(date2, formatter)
+    return localDate1.isAfter(localDate2)
 }
