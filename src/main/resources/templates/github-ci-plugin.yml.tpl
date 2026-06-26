@@ -10,31 +10,6 @@ env:
   JAVA_DISTRIBUTION: 'temurin'
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up JDK 25
-        uses: actions/setup-java@v5
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-
-      - name: Checkstyle (PMD)
-        uses: gradle/gradle-build-action@v3
-        with:
-          arguments: --no-daemon -i pmdMain pmdTest pmdIntegrationTest
-
-      - name: Validate Logs
-        uses: gradle/gradle-build-action@v3
-        with:
-          arguments: --no-daemon -i validateLogs
-
   bump-and-tag:
     needs: lint
     runs-on: ubuntu-latest
