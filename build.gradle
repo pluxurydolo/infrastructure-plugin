@@ -136,6 +136,9 @@ tasks.register('bumpVersion') {
         if (isDateAfter(lastCommitDate, lastModifiedDate)) {
             minorVersion++
             patchVersion = 0
+        } else if (patchVersion == 0 && lastModifiedDate == lastCommitDate) {
+            project.logger.lifecycle("jamc [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая, бамп патч-версии не произойдет")
+            return
         } else {
             patchVersion++
         }
@@ -154,7 +157,7 @@ tasks.register('bumpVersion') {
     }
 }
 
-static def getLastCommitDate() {
+static String getLastCommitDate() {
     return 'git log -1 --format=%cd --date=short'.execute().text.trim()
 }
 
