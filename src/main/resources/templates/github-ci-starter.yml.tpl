@@ -154,6 +154,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
+          ref: "v${{ needs.bump-and-tag.outputs.new_version }}"
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
