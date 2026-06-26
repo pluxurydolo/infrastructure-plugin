@@ -1,5 +1,4 @@
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 import static org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import static org.jreleaser.model.Active.ALWAYS
@@ -11,11 +10,7 @@ plugins {
 }
 
 group = 'io.github.pluxurydolo'
-version = file('version.properties').withInputStream {
-    Properties props = new Properties()
-    props.load(it)
-    props.getProperty('VERSION')
-}
+version = bumpAndGetVersion(false)
 
 java {
     withJavadocJar()
@@ -121,52 +116,49 @@ tasks.register('bumpVersion') {
     group = 'version'
 
     doLast {
-        Properties props = new Properties()
-
-        File versionFile = file('version.properties')
-        versionFile.withInputStream { props.load(it) }
-
-        String lastCommitDate = getLastCommitDate()
-        String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE', lastCommitDate)
-
-        int majorVersion = props.getProperty('VERSION_MAJOR').toInteger()
-        int minorVersion = props.getProperty('VERSION_MINOR').toInteger()
-        int patchVersion = props.getProperty('VERSION_PATCH').toInteger()
-
-        if (isDateAfter(lastCommitDate, lastModifiedDate)) {
-            minorVersion++
-            patchVersion = 0
-        } else if (patchVersion == 0 && lastModifiedDate == lastCommitDate) {
-            project.logger.lifecycle("zylw [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая")
-            project.logger.lifecycle('apyc [infrastructure-plugin] Патч номер не трогаем, обновляем дату')
-            props.setProperty('LAST_MODIFIED_DATE', lastCommitDate)
-            versionFile.withOutputStream { props.store(it, null) }
-            return
-        } else {
-            patchVersion++
-        }
-
-        String version = "$majorVersion.$minorVersion.$patchVersion"
-        project.logger.lifecycle("wgiq [infrastructure-plugin] Новая версия проекта: $version")
-
-        props.setProperty('VERSION_MAJOR', majorVersion.toString())
-        props.setProperty('VERSION_MINOR', minorVersion.toString())
-        props.setProperty('VERSION_PATCH', patchVersion.toString())
-
-        props.setProperty('VERSION', version)
-        props.setProperty('LAST_MODIFIED_DATE', lastCommitDate)
-
-        versionFile.withOutputStream { props.store(it, null) }
+        bumpAndGetVersion(true)
     }
 }
 
-static String getLastCommitDate() {
-    return 'git log -1 --format=%cd --date=short'.execute().text.trim()
+String bumpAndGetVersion(boolean force) {
+    Properties props = new Properties()
+    File versionFile = file('version.properties')
+    versionFile.withInputStream { props.load(it) }
+
+    if (!isCI() && !force) {
+        return props.getProperty('VERSION')
+    }
+
+    String currentDate = LocalDate.now().toString()
+    String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE', currentDate)
+
+    int major = props.getProperty('VERSION_MAJOR').toInteger()
+    int minor = props.getProperty('VERSION_MINOR').toInteger()
+    int patch = props.getProperty('VERSION_PATCH').toInteger()
+
+    if (patch == -1) {
+        patch = 0
+    } else if (currentDate > lastModifiedDate) {
+        minor++
+        patch = 0
+    } else {
+        patch++
+    }
+
+    String version = "$major.$minor.$patch"
+    println "ukqf [infrastructure-plugin] Новая версия проекта: $version"
+
+    props.setProperty('VERSION_MAJOR', major.toString())
+    props.setProperty('VERSION_MINOR', minor.toString())
+    props.setProperty('VERSION_PATCH', patch.toString())
+    props.setProperty('VERSION', version)
+    props.setProperty('LAST_MODIFIED_DATE', currentDate)
+
+    versionFile.withOutputStream { props.store(it, null) }
+
+    return version
 }
 
-static boolean isDateAfter(String date1, String date2) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern('yyyy-MM-dd')
-    LocalDate localDate1 = LocalDate.parse(date1, formatter)
-    LocalDate localDate2 = LocalDate.parse(date2, formatter)
-    return localDate1.isAfter(localDate2)
+static boolean isCI() {
+    return System.getenv('CI') == 'true' || System.getenv('GITHUB_ACTIONS') == 'true'
 }

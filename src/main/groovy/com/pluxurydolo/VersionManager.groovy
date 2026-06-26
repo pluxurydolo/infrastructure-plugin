@@ -2,10 +2,10 @@ package com.pluxurydolo
 
 import org.gradle.api.Project
 
-import static com.pluxurydolo.util.DateUtils.isDateAfter
+import java.time.LocalDate
+
 import static com.pluxurydolo.util.FileUtils.createVersionFile
 import static com.pluxurydolo.util.FileUtils.getVersionFile
-import static com.pluxurydolo.util.GitUtils.lastCommitDate
 
 class VersionManager {
     static void initVersionFile(Project project) {
@@ -20,39 +20,33 @@ class VersionManager {
 
     static void bumpVersion(Project project) {
         Properties props = new Properties()
-
         File versionFile = getVersionFile(project)
         versionFile.withInputStream { props.load(it) }
 
-        String lastCommitDate = getLastCommitDate()
-        String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE', lastCommitDate)
+        String currentDate = LocalDate.now().toString()
+        String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE', currentDate)
 
-        int majorVersion = props.getProperty('VERSION_MAJOR').toInteger()
-        int minorVersion = props.getProperty('VERSION_MINOR').toInteger()
-        int patchVersion = props.getProperty('VERSION_PATCH').toInteger()
+        int major = props.getProperty('VERSION_MAJOR').toInteger()
+        int minor = props.getProperty('VERSION_MINOR').toInteger()
+        int patch = props.getProperty('VERSION_PATCH').toInteger()
 
-        if (isDateAfter(lastCommitDate, lastModifiedDate)) {
-            minorVersion++
-            patchVersion = 0
-        } else if (patchVersion == 0 && lastModifiedDate == lastCommitDate) {
-            project.logger.lifecycle("jamc [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая")
-            project.logger.lifecycle('jjfb [infrastructure-plugin] Патч номер не трогаем, обновляем дату')
-            props.setProperty('LAST_MODIFIED_DATE', lastCommitDate)
-            versionFile.withOutputStream { props.store(it, null) }
-            return
+        if (patch == -1) {
+            patch = 0
+        } else if (currentDate > lastModifiedDate) {
+            minor++
+            patch = 0
         } else {
-            patchVersion++
+            patch++
         }
 
-        String version = "$majorVersion.$minorVersion.$patchVersion"
-        project.logger.lifecycle("snua [infrastructure-plugin] Новая версия проекта: $version")
+        GString version = "$major.$minor.$patch"
+        project.logger.lifecycle("ukqf [infrastructure-plugin] Новая версия проекта: $version")
 
-        props.setProperty('VERSION_MAJOR', majorVersion.toString())
-        props.setProperty('VERSION_MINOR', minorVersion.toString())
-        props.setProperty('VERSION_PATCH', patchVersion.toString())
-
+        props.setProperty('VERSION_MAJOR', major.toString())
+        props.setProperty('VERSION_MINOR', minor.toString())
+        props.setProperty('VERSION_PATCH', patch.toString())
         props.setProperty('VERSION', version)
-        props.setProperty('LAST_MODIFIED_DATE', lastCommitDate)
+        props.setProperty('LAST_MODIFIED_DATE', currentDate)
 
         versionFile.withOutputStream { props.store(it, null) }
     }

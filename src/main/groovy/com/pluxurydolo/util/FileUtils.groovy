@@ -4,7 +4,8 @@ import com.pluxurydolo.InfrastructurePlugin
 import com.pluxurydolo.extension.DeployExtension
 import org.gradle.api.Project
 
-import static com.pluxurydolo.util.DateUtils.getCurrentDate
+import java.time.LocalDate
+
 import static com.pluxurydolo.util.InfrastructureFile.*
 
 class FileUtils {
@@ -13,7 +14,7 @@ class FileUtils {
         String minor = '0'
         String patch = '0'
         String version = '1.0.0'
-        String currentDate = getCurrentDate()
+        String currentDate = LocalDate.now().toString()
 
         Properties props = new Properties()
         props.setProperty('VERSION_MAJOR', major)
