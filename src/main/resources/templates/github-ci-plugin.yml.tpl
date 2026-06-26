@@ -57,8 +57,8 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "chore: bump version [skip ci]"
             git push origin HEAD:main
-            git tag -a "v${{ steps.get_version.outputs.VERSION }}" -m "Release v${{ steps.get_version.outputs.VERSION }}"
-            git push origin "v${{ steps.get_version.outputs.VERSION }}"
+            git tag -a "${{ steps.get_version.outputs.VERSION }}" -m "Release ${{ steps.get_version.outputs.VERSION }}"
+            git push origin "${{ steps.get_version.outputs.VERSION }}"
             echo "version=${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_OUTPUT
           else
             echo "No changes to version.properties"
@@ -76,7 +76,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
-          ref: "v${{ needs.bump-and-tag.outputs.new_version }}"
+          ref: "${{ needs.bump-and-tag.outputs.new_version }}"
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
