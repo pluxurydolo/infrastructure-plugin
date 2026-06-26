@@ -27,6 +27,7 @@ class InfrastructurePlugin implements Plugin<Project> {
         registerGenerateGitLabCI(project)
         registerGenerateGitHubCI(project)
         registerGenerateDependabotConfig(project)
+        registerGenerateDependencySubmission(project)
         registerGenerateReadme(project)
 
         project.afterEvaluate {
@@ -97,8 +98,15 @@ class InfrastructurePlugin implements Plugin<Project> {
 
     private static void registerGenerateDependabotConfig(Project project) {
         String taskName = 'generateDependabotConfig'
-        String taskGroup = 'dependabot'
+        String taskGroup = 'github'
         Runnable action = () -> generateFromTemplate(project, DEPENDABOT_CONFIG)
+        registerTask(project, taskName, taskGroup, action)
+    }
+
+    private static void registerGenerateDependencySubmission(Project project) {
+        String taskName = 'generateDependencySubmission'
+        String taskGroup = 'github'
+        Runnable action = () -> generateFromTemplate(project, DEPENDENCY_SUBMISSION)
         registerTask(project, taskName, taskGroup, action)
     }
 
