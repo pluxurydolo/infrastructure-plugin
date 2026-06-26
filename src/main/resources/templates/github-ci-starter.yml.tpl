@@ -149,6 +149,7 @@ jobs:
 
   publish:
     needs: bump-and-tag
+    if: needs.bump-and-tag.outputs.new_version != ''
     runs-on: ubuntu-latest
     environment: CI/CD
     permissions:
@@ -182,7 +183,7 @@ jobs:
           JRELEASER_MAVENCENTRAL_SONATYPE_TOKEN: ${{ secrets.JRELEASER_MAVENCENTRAL_SONATYPE_TOKEN }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
 
-      - name: Release with JReleaser
+      - name: Release
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i jreleaserFullRelease

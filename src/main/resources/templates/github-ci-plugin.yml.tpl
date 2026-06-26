@@ -20,11 +20,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
-          ref: "v${{ needs.bump-and-tag.outputs.new_version }}"
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up JDK 25
+      - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -65,8 +64,10 @@ jobs:
             echo "No changes to version.properties"
             echo "version=" >> $GITHUB_OUTPUT
           fi
+
   publish:
     needs: bump-and-tag
+    if: needs.bump-and-tag.outputs.new_version != ''
     runs-on: ubuntu-latest
     environment: CI/CD
     permissions:
@@ -75,10 +76,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
+          ref: "v${{ needs.bump-and-tag.outputs.new_version }}"
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up JDK 25
+      - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -87,7 +89,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Build and publish
+      - name: Build and publish to Maven Central
         uses: gradle/gradle-build-action@v3
         with:
           arguments: --no-daemon -i jreleaserConfig build publish
