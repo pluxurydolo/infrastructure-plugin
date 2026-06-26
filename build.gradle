@@ -1,5 +1,3 @@
-import java.time.LocalDate
-
 import static org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import static org.jreleaser.model.Active.ALWAYS
 
@@ -10,7 +8,7 @@ plugins {
 }
 
 group = 'io.github.pluxurydolo'
-version = bumpAndGetVersion(false)
+version = '7.0.0'
 
 java {
     withJavadocJar()
@@ -110,55 +108,4 @@ jreleaser {
             }
         }
     }
-}
-
-tasks.register('bumpVersion') {
-    group = 'version'
-
-    doLast {
-        bumpAndGetVersion(true)
-    }
-}
-
-String bumpAndGetVersion(boolean force) {
-    Properties props = new Properties()
-    File versionFile = file('version.properties')
-    versionFile.withInputStream { props.load(it) }
-
-    if (!isCI() && !force) {
-        return props.getProperty('VERSION')
-    }
-
-    String currentDate = LocalDate.now().toString()
-    String lastModifiedDate = props.getProperty('LAST_MODIFIED_DATE', currentDate)
-
-    int major = props.getProperty('VERSION_MAJOR').toInteger()
-    int minor = props.getProperty('VERSION_MINOR').toInteger()
-    int patch = props.getProperty('VERSION_PATCH').toInteger()
-
-    if (patch == -1) {
-        patch = 0
-    } else if (currentDate > lastModifiedDate) {
-        minor++
-        patch = 0
-    } else {
-        patch++
-    }
-
-    String version = "$major.$minor.$patch"
-    println "ukqf [infrastructure-plugin] Новая версия проекта: $version"
-
-    props.setProperty('VERSION_MAJOR', major.toString())
-    props.setProperty('VERSION_MINOR', minor.toString())
-    props.setProperty('VERSION_PATCH', patch.toString())
-    props.setProperty('VERSION', version)
-    props.setProperty('LAST_MODIFIED_DATE', currentDate)
-
-    versionFile.withOutputStream { props.store(it, null) }
-
-    return version
-}
-
-static boolean isCI() {
-    return System.getenv('CI') == 'true' || System.getenv('GITHUB_ACTIONS') == 'true'
 }

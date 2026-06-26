@@ -10,12 +10,11 @@ env:
   JAVA_DISTRIBUTION: 'temurin'
 
 jobs:
-  bump-and-tag:
+  publish:
     runs-on: ubuntu-latest
+    environment: CI/CD
     permissions:
       contents: write
-    outputs:
-      new_version: ${{ steps.commit_and_tag.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -37,57 +36,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Bump version
-        uses: gradle/gradle-build-action@v3
-        with:
-          arguments: --no-daemon -i bumpVersion
-
-      - name: Get new version
-        id: get_version
+      - name: Get version
+        id: version
         run: |
-          VERSION=$(grep "^VERSION=" version.properties | cut -d'=' -f2)
+          VERSION=$(grep "^version" build.gradle | head -1 | grep -o "[0-9.]*")
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Commit version update and create tag
-        id: commit_and_tag
+      - name: Create and push tag
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add version.properties
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: bump version [skip ci]"
-            git push origin HEAD:main
-            git tag -a "v${{ steps.get_version.outputs.VERSION }}" -m "Release v${{ steps.get_version.outputs.VERSION }}"
-            git push origin "v${{ steps.get_version.outputs.VERSION }}"
-            echo "version=${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_OUTPUT
-          else
-            echo "No changes to version.properties"
-            echo "version=" >> $GITHUB_OUTPUT
-          fi
-
-  publish:
-    needs: bump-and-tag
-    if: needs.bump-and-tag.outputs.new_version != ''
-    runs-on: ubuntu-latest
-    environment: CI/CD
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          ref: "v${{ needs.bump-and-tag.outputs.new_version }}"
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up JDK
-        uses: actions/setup-java@v5
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+          git tag -a "${{ steps.version.outputs.VERSION }}" -m "Release ${{ steps.version.outputs.VERSION }}"
+          git push origin "${{ steps.version.outputs.VERSION }}"
 
       - name: Build and publish to Maven Central
         uses: gradle/gradle-build-action@v3
