@@ -137,7 +137,10 @@ tasks.register('bumpVersion') {
             minorVersion++
             patchVersion = 0
         } else if (patchVersion == 0 && lastModifiedDate == lastCommitDate) {
-            project.logger.lifecycle("zylw [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая, патч-номер не увеличится")
+            project.logger.lifecycle("zylw [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая")
+            project.logger.lifecycle('apyc [infrastructure-plugin] Патч номер не трогаем, обновляем дату')
+            props.setProperty('LAST_MODIFIED_DATE', lastCommitDate)
+            versionFile.withOutputStream { props.store(it, null) }
             return
         } else {
             patchVersion++

@@ -35,7 +35,10 @@ class VersionManager {
             minorVersion++
             patchVersion = 0
         } else if (patchVersion == 0 && lastModifiedDate == lastCommitDate) {
-            project.logger.lifecycle("jamc [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая, патч-номер не увеличится")
+            project.logger.lifecycle("jamc [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая")
+            project.logger.lifecycle('jjfb [infrastructure-plugin] Патч номер не трогаем, обновляем дату')
+            props.setProperty('LAST_MODIFIED_DATE', lastCommitDate)
+            versionFile.withOutputStream { props.store(it, null) }
             return
         } else {
             patchVersion++
