@@ -35,7 +35,7 @@ class VersionManager {
             minorVersion++
             patchVersion = 0
         } else if (patchVersion == 0 && lastModifiedDate == lastCommitDate) {
-            project.logger.lifecycle("jamc [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая, бамп патч-версии не произойдет")
+            project.logger.lifecycle("jamc [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая, патч-номер не увеличится")
             return
         } else {
             patchVersion++

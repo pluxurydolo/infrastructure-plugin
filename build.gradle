@@ -137,14 +137,14 @@ tasks.register('bumpVersion') {
             minorVersion++
             patchVersion = 0
         } else if (patchVersion == 0 && lastModifiedDate == lastCommitDate) {
-            project.logger.lifecycle("jamc [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая, бамп патч-версии не произойдет")
+            project.logger.lifecycle("zylw [infrastructure-plugin] Версия $majorVersion.$minorVersion.$patchVersion свежая, патч-номер не увеличится")
             return
         } else {
             patchVersion++
         }
 
         String version = "$majorVersion.$minorVersion.$patchVersion"
-        project.logger.lifecycle("snua [infrastructure-plugin] Новая версия проекта: $version")
+        project.logger.lifecycle("wgiq [infrastructure-plugin] Новая версия проекта: $version")
 
         props.setProperty('VERSION_MAJOR', majorVersion.toString())
         props.setProperty('VERSION_MINOR', minorVersion.toString())
