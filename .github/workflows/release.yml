@@ -15,7 +15,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      new_version: ${{ steps.get_version.outputs.VERSION }}
+      new_version: ${{ steps.commit_and_tag.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -49,6 +49,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Commit version update and create tag
+        id: commit_and_tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -58,8 +59,10 @@ jobs:
             git push origin HEAD:main
             git tag -a "v${{ steps.get_version.outputs.VERSION }}" -m "Release v${{ steps.get_version.outputs.VERSION }}"
             git push origin "v${{ steps.get_version.outputs.VERSION }}"
+            echo "version=${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_OUTPUT
           else
             echo "No changes to version.properties"
+            echo "version=" >> $GITHUB_OUTPUT
           fi
   publish:
     needs: bump-and-tag
