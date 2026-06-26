@@ -7,7 +7,7 @@ updates:
       day: "sunday"
       time: "00:00"
       timezone: "Europe/Moscow"
-    open-pull-requests-limit: 100
+    open-pull-requests-limit: 15
     labels:
       - "dependencies"
     reviewers:

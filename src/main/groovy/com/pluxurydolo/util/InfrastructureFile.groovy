@@ -9,7 +9,6 @@ enum InfrastructureFile {
     GITHUBCI_STARTER('github-ci-starter.yml.tpl', '.github/workflows/release.yml'),
     GITHUBCI_APP('github-ci-app.yml.tpl', '.github/workflows/deploy.yml'),
     DEPENDABOT_CONFIG('dependabot.yml.tpl', '.github/dependabot.yml'),
-    DEPENDENCY_SUBMISSION('dependency-submission.yml.tpl', '.github/workflows/dependency-submission.yml'),
     README_DOCKER('readme-docker.tpl', 'README.md'),
     README_JRELEASER('readme-jreleaser.tpl', 'README.md');
 
