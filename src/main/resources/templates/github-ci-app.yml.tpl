@@ -178,10 +178,10 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_HUB_LOGIN }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
@@ -194,7 +194,7 @@ jobs:
           echo "TAG=${VERSION}-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
