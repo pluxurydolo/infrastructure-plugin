@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'io.github.pluxurydolo'
-version = '8.0.0'
+version = '8.1.0'
 
 java {
     withJavadocJar()
@@ -34,8 +34,9 @@ gradlePlugin {
 
 processResources {
     duplicatesStrategy = INCLUDE
-    from 'src/main/resources'
-    into 'templates'
+    from('src/main/resources') {
+        into 'templates'
+    }
 }
 
 afterEvaluate {
