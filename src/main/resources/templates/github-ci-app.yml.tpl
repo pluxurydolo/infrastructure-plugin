@@ -248,6 +248,12 @@ jobs:
             docker stop {{SERVICE_NAME}} || true
             docker rm {{SERVICE_NAME}} || true
 
+            docker images | awk 'NR>1 {print \$1 ":" \$2}' |
+              grep '^${IMAGE_NAME}:' |
+              xargs -r docker rmi -f || true
+
+            docker builder prune -af || true
+
             sudo fuser -k {{DEPLOY_PORT}}/tcp || true
 
             mkdir -p /home/${SSH_USER}/logs/{{SERVICE_NAME}}
@@ -264,4 +270,9 @@ jobs:
               -v ~/.env:/app/.env:ro \
               -v /home/${SSH_USER}/logs/{{SERVICE_NAME}}:/app/logs \
               ${IMAGE_NAME}:${IMAGE_TAG}
+
+            sleep 5
+            docker ps --filter 'name={{SERVICE_NAME}}' --filter 'status=running' |
+              grep -q {{SERVICE_NAME}} ||
+              { echo 'Container failed to start'; docker logs --tail 100 {{SERVICE_NAME}}; exit 1; }
           "
