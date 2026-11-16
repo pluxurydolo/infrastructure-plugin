@@ -3,8 +3,7 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "sunday"
+      interval: "monthly"
       time: "00:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 15
@@ -21,8 +20,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "sunday"
+      interval: "monthly"
       time: "00:00"
       timezone: "Europe/Moscow"
     labels:
